@@ -4,15 +4,25 @@ var x_position = Bus.control(s, 5);
 var y_position = Bus.control(s, 5);
 var note_amp = Bus.control(s, 5);
 var notes = Array.newClear(5);
+var output = Bus.audio(s, 1);
+
+var out = SynthDef.new(\out, {
+  |input, outBus|
+  var sig;
+  sig = In.ar(input, 1);
+  sig = FreeVerb.ar(sig, 0.4, 0.85);
+  Out.ar(outBus, sig!2);
+});
 
 var synthdef = SynthDef.new(\sinez, {
   |index, gate|
-  var sig, env, amp;
+  var sig, env, amp, freq;
+  freq = x_position.kr(1, index).linexp(0, 230, 40, 2000).varlag(0.05);
   amp = note_amp.kr(1, index).linlin(0, 2000, 0, 1).varlag(0.05);
   env = EnvGen.kr(Env.adsr(0.05, 0.5, 0.5, 0.05, 1), gate: gate, doneAction: 2);
-  sig = Saw.ar(x_position.kr(1, index).linexp(0, 230, 30, 2000).varlag(0.05)) * amp * env;
-  sig = RLPF.ar(sig, y_position.kr(1, index).linexp(0, 130, 60, 2000).varlag(0.05), 0.75);
-  Out.ar(0, sig!2);
+  sig = Saw.ar(freq) * amp * env;
+  sig = RLPF.ar(sig, freq * y_position.kr(1, index).linlin(0, 130, 0.5, 10).varlag(0.05), 0.75);
+  Out.ar(output, sig);
 });
 
 var startStopSynths = { |id, command|
@@ -67,11 +77,12 @@ var oscSetup = {
 };
 
 var start = Routine({
+  out.add;
   synthdef.add;
   s.sync;
+  Synth.new(\out, [\input, output, \outBus, 0]);
   oscSetup.value;
 });
 
 s.waitForBoot({start.play});
 )
-
