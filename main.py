@@ -69,15 +69,15 @@ def do_frame(frame, info):
         for n in range(frame.n_contacts):
             c = frame.contacts[n]
             if c.state == sensel.CONTACT_START:
-                client.send_message(f"/lifecycle/{c.id}/", "start")
+                client.send_message(f"/lifecycle", [c.id, "start"])
             elif c.state == sensel.CONTACT_END:
-                client.send_message(f"/lifecycle/{c.id}/", "end")
+                client.send_message(f"/lifecycle", [c.id, "end"])
             else:
-                client.send_message(f"/lifecycle/{c.id}/", "continue")
+                client.send_message(f"/lifecycle", [c.id, "continue"])
 
-            client.send_message(f"/positions/{c.id}/x/", c.x_pos)
-            client.send_message(f"/positions/{c.id}/y/", c.y_pos)
-            client.send_message(f"/pressure/{c.id}/", c.total_force)
+            client.send_message(f"/x_position", [c.id, c.x_pos])
+            client.send_message(f"/y_position", [c.id, c.y_pos])
+            client.send_message(f"/pressure", [c.id, c.total_force])
             
 
 def scale_x(pos):
