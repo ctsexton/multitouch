@@ -1,5 +1,4 @@
 (
-
 var x_position = Bus.control(s, 16);
 var y_position = Bus.control(s, 16);
 var note_amp = Bus.control(s, 16);
@@ -64,4 +63,3 @@ var start = Routine({
 
 s.waitForBoot({start.play});
 )
-OSCFunc.trace(false)
